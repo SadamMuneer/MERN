@@ -1,4 +1,5 @@
 const usermodel = require("../models/usermodels");
+const jwt = require("jsonwebtoken");
 const UserLogin = async (req, res) => {
   try {
     //destructor
@@ -13,12 +14,15 @@ const UserLogin = async (req, res) => {
     if (password !== userExist.password) {
       return res.status(400).json({ msg: "incorrect password!" });
     }
+    // jwt token
+    const token = jwt.sign({ userid: userExist?._id }, process.env.JWT_SECRET, {
+      algorithm: "HS384",
+      audience: "user",
+      expiresIn: "2m",
+      issuer: "server",
+    });
+    console.log(token, "jwt token is working");
 
-    // credentials
-    const token = crypto
-      .createHmac("sha256", "hellomynameishamza")
-      .update(userExist._id.toString())
-      .digest("hex");
     // create cookie
     res.cookie("access", token, {
       httpOnly: true, // client/ user will not access. only server will access
